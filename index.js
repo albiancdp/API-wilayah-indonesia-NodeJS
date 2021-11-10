@@ -5,7 +5,6 @@ const express = require('express');
 const compression = require('compression');
 const cors = require('cors');
 const { db } = require('./config/db');
-
 // variable
 const port = process.env.PORT;
 // express
@@ -15,9 +14,8 @@ REST.use(compression());
 // setting body-parser
 REST.use(express.json());
 REST.use(express.urlencoded({ extended: true }));
-// controller
+// function get data from db
 const executeDB = (sql, val) => new Promise((resolve) => {
-  // get session di db ada nggak
   db.query(sql, val)
     .then(async (result) => {
       resolve({
@@ -29,15 +27,17 @@ const executeDB = (sql, val) => new Promise((resolve) => {
       resolve({ status: false, code: 500, error: 'Internal Server Error' });
     });
 });
-
-REST.get('/region/province', async (req, res) => { // provinsi
+// Controller
+// provinsi
+REST.get('/region/province', async (req, res) => {
   const search = (req.query.search === '' || req.query.search === undefined) ? '%%' : `%${req.query.search.toLowerCase()}%`;
   const sql = 'SELECT * FROM t_region_provinces WHERE LOWER(name) LIKE $1';
   const val = [search];
   const response = await executeDB(sql, val);
   res.status(response.code).send(response);
 });
-REST.get('/region/regency', async (req, res) => { // kota
+// kota
+REST.get('/region/regency', async (req, res) => {
   const search = (req.query.search === '' || req.query.search === undefined) ? '%%' : `%${req.query.search.toLowerCase()}%`;
   const provId = (req.query.province_id === '' || req.query.province_id === undefined) ? null : req.query.province_id;
   const sql = 'SELECT * FROM t_region_regencies WHERE LOWER(name) LIKE $1 AND ($2 is null OR province_id = $2)';
@@ -45,7 +45,8 @@ REST.get('/region/regency', async (req, res) => { // kota
   const response = await executeDB(sql, val);
   res.status(response.code).send(response);
 });
-REST.get('/region/district', async (req, res) => { // kecamatan
+// kecamatan
+REST.get('/region/district', async (req, res) => {
   const search = (req.query.search === '' || req.query.search === undefined) ? '%%' : `%${req.query.search.toLowerCase()}%`;
   const regencyId = (req.query.regency_id === '' || req.query.regency_id === undefined) ? null : req.query.regency_id;
   const sql = 'SELECT * FROM t_region_districts WHERE LOWER(name) LIKE $1 AND ($2 is null OR regency_id = $2)';
@@ -53,7 +54,8 @@ REST.get('/region/district', async (req, res) => { // kecamatan
   const response = await executeDB(sql, val);
   res.status(response.code).send(response);
 });
-REST.get('/region/village', async (req, res) => { // desa
+// desa
+REST.get('/region/village', async (req, res) => {
   const search = (req.query.search === '' || req.query.search === undefined) ? '%%' : `%${req.query.search.toLowerCase()}%`;
   const disId = (req.query.district_id === '' || req.query.district_id === undefined) ? null : req.query.district_id;
   const sql = 'SELECT * FROM t_region_villages WHERE LOWER(name) LIKE $1 AND ($2 is null OR district_id = $2)';
