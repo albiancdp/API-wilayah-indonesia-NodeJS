@@ -63,6 +63,14 @@ REST.get('/region/village', async (req, res) => {
   const response = await executeDB(sql, val);
   res.status(response.code).send(response);
 });
+// handle error no route
+REST.get('/*', async (req, res) => {
+  res.status(404).send({
+    status: false,
+    code: 404,
+    message: 'Service Not Found',
+  });
+});
 // running listen port
 REST.listen(port, () => {
   console.log(`Region REST Service listening on port ${port}`);
